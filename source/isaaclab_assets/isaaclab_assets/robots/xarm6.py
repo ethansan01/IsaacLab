@@ -11,7 +11,7 @@ from isaaclab.assets.articulation import ArticulationCfg
 
 XARM6_CONFIG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path="/home/rfa/Downloads/xarm6_with_gripper_with_spoon.usd",
+        usd_path="/home/yiheng/Downloads/xarm6_new.usd",
         activate_contact_sensors=False,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
