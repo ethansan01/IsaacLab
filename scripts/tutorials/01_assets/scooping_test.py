@@ -50,6 +50,14 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
 
     """Designs the scene."""
     
+
+
+
+
+
+
+
+    
     # Ground-plane
     ground = AssetBaseCfg(prim_path="/World/defaultGroundPlane", spawn=sim_utils.GroundPlaneCfg())
     # lights
