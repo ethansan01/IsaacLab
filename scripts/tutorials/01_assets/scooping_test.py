@@ -57,7 +57,7 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
 
 
 
-    
+
     # Ground-plane
     ground = AssetBaseCfg(prim_path="/World/defaultGroundPlane", spawn=sim_utils.GroundPlaneCfg())
     # lights
@@ -68,7 +68,7 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
     # particle_system = sim_utils.MeshCfg()
 
     particle = AssetBaseCfg(prim_path="{ENV_REGEX_NS}/particle", spawn=sim_utils.UsdFileCfg(
-        usd_path="/home/yiheng/Downloads/fluid_new.usd",),
+        usd_path="/home/yiheng/IsaacLab/scooping_env_asset/fluid_new.usd",),
         init_state=AssetBaseCfg.InitialStateCfg(pos=(0.6, 0.1, 0.5), rot=(1, 0.0, 0.0, 0.0),),
     )
 
@@ -76,7 +76,7 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
     table = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/table",
         spawn=sim_utils.UsdFileCfg(
-            usd_path="/home/yiheng/Downloads/table1.usd",
+            usd_path="/home/yiheng/IsaacLab/scooping_env_asset/table1.usd",
             scale=(0.5, 0.5, 0.5),
             collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
             rigid_props=sim_utils.RigidBodyPropertiesCfg(disable_gravity=False, kinematic_enabled=False),
@@ -92,7 +92,7 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
             "bowl_1": RigidObjectCfg(
                 prim_path="{ENV_REGEX_NS}/bowl_1",
                 spawn=sim_utils.UsdFileCfg(
-                    usd_path="/home/yiheng/Downloads/bowl.usd",
+                    usd_path="/home/yiheng/IsaacLab/scooping_env_asset/bowl.usd",
                     scale=(1.0, 1.0, 1.0),
                     visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 1.0, 0.0)),
                     collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
@@ -106,7 +106,7 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
             "bowl_2": RigidObjectCfg(
                 prim_path="{ENV_REGEX_NS}/bowl_2",
                 spawn=sim_utils.UsdFileCfg(
-                    usd_path="/home/yiheng/Downloads/bowl.usd",
+                    usd_path="/home/yiheng/IsaacLab/scooping_env_asset/bowl.usd",
                     scale=(1.0, 1.0, 1.0),
                     visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0)),
                     collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
@@ -120,7 +120,7 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
             "bowl_3": RigidObjectCfg(
                 prim_path="{ENV_REGEX_NS}/bowl_3",
                 spawn=sim_utils.UsdFileCfg(
-                    usd_path="/home/yiheng/Downloads/bowl.usd",
+                    usd_path="/home/yiheng/IsaacLab/scooping_env_asset/bowl.usd",
                     scale=(1.0, 1.0, 1.0),
                     visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 0.0, 1.0)),
                     collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
@@ -137,17 +137,16 @@ class ScoopingSceneCfg(InteractiveSceneCfg):
     # spoon_utensil_mount = RigidObjectCfg(
     #     prim_path="{ENV_REGEX_NS}/spoon_utensil_mount",
     #     spawn=sim_utils.UsdFileCfg(
-    #         usd_path="/home/rfa/Downloads/spoon_utensil_mount.usd",
+    #         usd_path="/home/rfa/IsaacLab/scooping_env_asset/spoon_utensil_mount.usd",
     #         scale=(1.0, 1.0, 1.0),
 
 
     # robot
 
-    # xArm6 = XARM6_CONFIG.replace(prim_path="{ENV_REGEX_NS}/xArm6")
+    xArm6 = XARM6_CONFIG.replace(prim_path="{ENV_REGEX_NS}/xArm6")
 def init_particle_step():
     stage = get_current_stage()
     
-    # ✅ Get the /World prim if it exists
     world_prim = stage.GetPrimAtPath("/World")
     
     if not world_prim.IsValid():
@@ -187,11 +186,10 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     sim_dt = sim.get_physics_dt()
     sim_time = 0.0
     count = 0
-    print("{ENV_REGEX_NS}")
     # Use this method for better readability
     # bowl: RigidObject = scene["bowl"]
     bowl_collection: RigidObjectCollection = scene["bowl_collection"]
-    # xarm6: Articulation = scene["xArm6"]
+    xarm6: Articulation = scene["xArm6"]
     table: RigidObject = scene["table"]
     assert bowl_collection.data.num_objects == 3, "Expected 3 bowls in the collection."
     particle_pos, particle_vel = get_particles_position()
@@ -208,50 +206,35 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 
             root_table_state = table.data.default_root_state.clone()
             root_table_state[:, :3] += scene.env_origins
-            # root_xarm6_state = xarm6.data.default_root_state.clone()
-            # root_xarm6_state[:, :3] += scene.env_origins
-            # root_bowl_state = bowl.data.default_root_state.clone()
-            # root_bowl_state[:, :3] += scene.env_origins
+            root_xarm6_state = xarm6.data.default_root_state.clone()
+            root_xarm6_state[:, :3] += scene.env_origins
 
 
             
             bowl_collection.write_object_link_pose_to_sim(root_bowl_collection_state[..., :7])
             bowl_collection.write_object_com_velocity_to_sim(root_bowl_collection_state[..., 7:])
-            # bowl.write_root_pose_to_sim(root_bowl_state[:, :7])
-            # bowl.write_root_velocity_to_sim(root_bowl_state[:, 7:])
             table.write_root_pose_to_sim(root_table_state[:, :7])
             table.write_root_velocity_to_sim(root_table_state[:, 7:])
+            xarm6.write_root_pose_to_sim(root_xarm6_state[:, :7])
+            xarm6.write_root_velocity_to_sim(root_xarm6_state[:, 7:])
 
-            # set_particles_position(particles_pos = particle_pos, particles_vel = particle_vel)
-            # xarm6.write_root_pose_to_sim(root_xarm6_state[:, :7])
-            # xarm6.write_root_velocity_to_sim(root_xarm6_state[:, 7:])
+            joint_pos, joint_vel = (
+                xarm6.data.default_joint_pos.clone(),
+                xarm6.data.default_joint_vel.clone(),
+            )
 
-            # joint_pos, joint_vel = (
-                # xarm6.data.default_joint_pos.clone(),
-                # xarm6.data.default_joint_vel.clone(),
-            # )
-
-            # xarm6.write_joint_state_to_sim(joint_pos, joint_vel)
-            # # bowl.write_data_to_sim()
+            xarm6.write_joint_state_to_sim(joint_pos, joint_vel)
             table.write_data_to_sim()
-            # print(xarm6.joint_names)
             bowl_collection.write_data_to_sim()
             # clear internal buffers
             scene.reset()
             print("[INFO]: Resetting xArm state...")
-        # current_pose = xarm6.data.default_joint_pos
-        # print(f"[INFO]: Current joint positions: {current_pose}")
-        # target_pose = torch.tensor([2, 0.0, 0.0, 0.0, -1.2, 0.0, 0.1, 0, 0, 0, 0, 0], device='cuda:0')  # Example target pose for the gripper
-        # new_pose = (1- alpha) * current_pose + alpha * target_pose
 
 
-        # wave_action = xarm6.data.default_joint_pos
-        # wave_action[:, 4] = 0.25 * np.sin(2 * np.pi * 0.5 * sim_time) -1.2
-        # xarm6.set_joint_position_target(wave_action)
-        # # scene["xArm6"].set_joint_position_target(wave_action)
-        # print(f"[INFO]: Setting joint positions to: {new_pose}")
-        # xarm6.set_joint_position_target(new_pose)
-        # xarm6.write_data_to_sim()
+        wave_action = xarm6.data.default_joint_pos
+        wave_action[:, 4] = 0.25 * np.sin(2 * np.pi * 0.5 * sim_time) -1.2
+        xarm6.set_joint_position_target(wave_action)
+        xarm6.write_data_to_sim()
         scene.write_data_to_sim()
         sim.step()
         sim_time += sim_dt
